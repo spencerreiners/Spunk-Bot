@@ -2,7 +2,6 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const dbPath = path.resolve(__dirname, 'economy.db');
 
-// Connect to the SQLite database, or create it if it doesn't exist
 const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
         console.error('Error when connecting to the database', err.message);
@@ -11,35 +10,35 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
     }
 });
 
-// Function to initialize the database
 const initDb = () => {
     db.serialize(() => {
-        // Create table for user balances
+        // Ensures the table 'balances' exists and has the necessary columns
         db.run(`CREATE TABLE IF NOT EXISTS balances (
             userId TEXT PRIMARY KEY,
-            balance INTEGER DEFAULT 1000
+            balance INTEGER DEFAULT 0,
+            lastClaimed INTEGER DEFAULT 0
         )`);
 
-        // Create table for items
+        // Attempt to add the 'lastClaimed' column if it doesn't exist (safe to run multiple times)
+        db.run(`ALTER TABLE balances ADD COLUMN lastClaimed INTEGER DEFAULT 0`, (alterErr) => {
+            if (alterErr) {
+                console.log("Column 'lastClaimed' already exists or another error occurred.");
+            } else {
+                console.log("Column 'lastClaimed' added successfully.");
+            }
+        });
+
+        // Ensures the table 'items' exists
         db.run(`CREATE TABLE IF NOT EXISTS items (
             itemId INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             price INTEGER
-        )`, (err) => {
-            if (err) {
-                console.error("Error creating items table", err.message);
-            } else {
-                // Optionally populate the table with initial items
-                db.run(`INSERT OR IGNORE INTO items (name, price) VALUES
-                    ('Magic Sword', 300),
-                    ('Healing Potion', 50)
-                `);
-            }
-        });
+        )`);
     });
 };
 
-// Export the database connection and initialization function
+initDb();
+
 module.exports = {
     db,
     initDb
