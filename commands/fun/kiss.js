@@ -19,7 +19,7 @@ module.exports = {
         .setName('kiss')
         .setDescription('Send a kiss to another user!')
         .addUserOption(option =>
-            option.setName('user')
+            option.setName('target')
                 .setDescription('The user you want to kiss')
                 .setRequired(true)
         ),
