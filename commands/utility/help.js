@@ -1,75 +1,54 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { Pagination } = require('pagination.djs');
 
 module.exports = {
-    data: new SlashCommandBuilder().setName('help').setDescription('Displays help information for available commands'),
+    data: new SlashCommandBuilder()
+        .setName('help')
+        .setDescription('Displays help information for available commands'),
     async execute(interaction) {
-        const commands = Array.from(interaction.client.commands.values()).map(command => {
-            return { name: command.data.name, description: command.data.description };
+        const commands = Array.from(interaction.client.commands.values())
+            .map(command => ({
+                name: command.data.name,
+                description: command.data.description
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        const descriptions = commands.map(cmd => `**/${cmd.name}**\n${cmd.description}`);
+
+        const pagination = new Pagination(interaction, {
+            idle: 60000, // active for 60 seconds
+            ephemeral: true
         });
 
-        const pages = commands.reduce((acc, curr, i) => {
-            const pageIndex = Math.floor(i / 5);
-            acc[pageIndex] = acc[pageIndex] || [];
-            acc[pageIndex].push(curr);
-            return acc;
-        }, []);
-
-        let currentPage = 0;
-
-        const createEmbed = (page) => {
-            const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle('Help Commands')
-                .setDescription('List of available commands:')
-                .setTimestamp();
-
-            pages[page].forEach(cmd => {
-                embed.addFields({ name: `/${cmd.name}`, value: cmd.description || 'No description provided' });
-            });
-
-            return embed;
-        };
-
-        const createButtons = (page) => {
-            return new ActionRowBuilder()
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('previous_btn')
-                        .setLabel('Previous')
-                        .setStyle(ButtonStyle.Primary)
-                        .setDisabled(page === 0),
-                    new ButtonBuilder()
-                        .setCustomId('next_btn')
-                        .setLabel('Next')
-                        .setStyle(ButtonStyle.Primary)
-                        .setDisabled(page === pages.length - 1 || pages.length === 0)
-                );
-        };
-
-        const message = await interaction.reply({
-            embeds: [createEmbed(currentPage)],
-            components: [createButtons(currentPage)],
-            fetchReply: true
-        });
-
-        const collector = message.createMessageComponentCollector({ componentType: 'BUTTON', time: 180000 });
-
-        collector.on('collect', async i => {
-            if (i.user.id !== interaction.user.id) {
-                return i.reply({ content: 'You cannot use these buttons.', ephemeral: true });
+        // Customize button appearances
+        pagination.setButtonAppearance({
+            first: { // customize the 'first' page button
+                label: 'First',
+                emoji: '⏮️',
+                style: ButtonStyle.Primary
+            },
+            prev: { // customize the 'previous' page button
+                label: 'Prev',
+                emoji: '◀️',
+                style: ButtonStyle.Secondary
+            },
+            next: { // customize the 'next' page button
+                label: 'Next',
+                emoji: '▶️',
+                style: ButtonStyle.Success
+            },
+            last: { // customize the 'last' page button
+                label: 'Last',
+                emoji: '⏭️',
+                style: ButtonStyle.Danger
             }
-
-            if (i.customId === 'previous_btn' && currentPage > 0) {
-                currentPage--;
-            } else if (i.customId === 'next_btn' && currentPage < pages.length - 1) {
-                currentPage++;
-            }
-
-            await i.update({ embeds: [createEmbed(currentPage)], components: [createButtons(currentPage)] });
         });
 
-        collector.on('end', () => {
-            message.edit({ components: [] }); // Clean up by removing the buttons
-        });
+        // Set the title and other options for the embed
+        pagination.setTitle('Available Commands'); // Set a title for all embeds
+        pagination.setDescription('Navigate through the pages to see all the commands.'); // Optional: Set a general description
+
+        pagination.setDescriptions(descriptions);
+        await pagination.render();
     }
 };
