@@ -34,6 +34,18 @@ const initDb = () => {
             name TEXT,
             price INTEGER
         )`);
+
+        // Create a new table for storing birthdays
+        db.run(`CREATE TABLE IF NOT EXISTS birthdays (
+            userId TEXT PRIMARY KEY,
+            birthday DATE NOT NULL
+        )`, (err) => {
+            if (err) {
+                console.log("Failed to create the birthdays table:", err.message);
+            } else {
+                console.log("Birthdays table created successfully.");
+            }
+        });
     });
 };
 
