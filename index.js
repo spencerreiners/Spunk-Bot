@@ -40,7 +40,7 @@ client.once(Events.ClientReady, () => {
 });
 
 client.on('ready', async () => {
-    const channel = client.channels.cache.get('1235785508378906717'); // Replace with your channel ID
+    const channel = client.channels.cache.get('1065349629232828569'); // Replace with your channel ID
     if (!channel) return console.error('Channel not found');
 
     const row = new ActionRowBuilder()
@@ -143,10 +143,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
         // Handle role assignment buttons
         const roleMap = {
-            "verified": "267450602777346049",
-            "film_critic": "1235803458641072198",
-            "true_gamer": "1235803658315239475",
-            "bell_dinger": "1235803166579228693",
+            "verified": "355442027757961218",
+            "film_critic": "1065351909025779835",
+            "true_gamer": "1065347777158189147",
+            "bell_dinger": "1065357188975046738",
         };
 
         const roleId = roleMap[interaction.customId];
