@@ -135,11 +135,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
             await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
         }
     } else if (interaction.isButton()) {
-        if (interaction.customId.startsWith('help_')) {
-            // Handle help navigation buttons
-            console.log('Handling help navigation:', interaction.customId);
-            return; // Here you should implement the actual help page navigation logic
-        }
+        // Commented out the /help handling part
+        // if (interaction.customId.startsWith('help_')) {
+        //     // Handle help navigation buttons
+        //     console.log('Handling help navigation:', interaction.customId);
+        //     return; // Here you should implement the actual help page navigation logic
+        // }
 
         // Handle role assignment buttons
         const roleMap = {
