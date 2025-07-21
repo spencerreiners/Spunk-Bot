@@ -1,19 +1,12 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { db } = require('../../setup-database'); // Adjust the path as necessary
+const { db } = require('../../setup-database');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('forgetbirthday')
-        .setDescription('Forgets your birthday'),
+        .setDescription('Deletes your saved birthday.'),
     async execute(interaction) {
-        const userId = interaction.user.id;
-
-        db.run('DELETE FROM birthdays WHERE userId = ?', [userId], function(err) {
-            if (err) {
-                console.error(err);
-                return interaction.reply({ content: 'Failed to forget your birthday.', ephemeral: true });
-            }
-            interaction.reply({ content: 'Your birthday has been forgotten.', ephemeral: true });
-        });
-    },
+        db.prepare('DELETE FROM birthdays WHERE userId = ?').run(interaction.user.id);
+        interaction.reply({ content: 'Your birthday has been forgotten.', ephemeral: true });
+    }
 };
