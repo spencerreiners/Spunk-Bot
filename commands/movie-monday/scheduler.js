@@ -16,7 +16,13 @@ async function sendMovieForm(client) {
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('submit_movie').setLabel('Submit').setStyle(ButtonStyle.Primary)
     );
-    await channel.send({ embeds: [embed], components: [row] });
+
+    await channel.send({
+        content: '@here 🎬 Suggest a Movie!',
+        embeds: [embed],
+        components: [row],
+        allowedMentions: { parse: ['everyone'] }
+    });
 }
 
 async function closeMovieForm(client) {
@@ -25,7 +31,10 @@ async function closeMovieForm(client) {
 
     const rows = db.prepare('SELECT userId, suggestion FROM movie_suggestions').all();
     if (!rows.length) {
-        await channel.send('📭 No movie suggestions were submitted this week.');
+        await channel.send({
+            content: '@here 📭 No movie suggestions were submitted this week.',
+            allowedMentions: { parse: ['everyone'] }
+        });
         return;
     }
 
@@ -35,7 +44,11 @@ async function closeMovieForm(client) {
         .setDescription(`Here are the submitted suggestions:\n\n${suggestions}`)
         .setColor('Orange');
 
-    await channel.send({ embeds: [embed] });
+    await channel.send({
+        content: '@here 🍿 Movie suggestion period is now closed!',
+        embeds: [embed],
+        allowedMentions: { parse: ['everyone'] }
+    });
 }
 
 async function sendMoviePoll(client) {
@@ -50,7 +63,10 @@ async function sendMoviePoll(client) {
         value: `${r.suggestion}_${r.userId}`.slice(0, 100)
     }));
 
-    const embed = new EmbedBuilder().setTitle('🎥 Vote for This Week’s Movie!').setColor('Green');
+    const embed = new EmbedBuilder()
+        .setTitle('🎥 Vote for This Week’s Movie!')
+        .setColor('Green');
+
     const select = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId('vote_movie')
@@ -58,7 +74,12 @@ async function sendMoviePoll(client) {
             .addOptions(options)
     );
 
-    await channel.send({ embeds: [embed], components: [select] });
+    await channel.send({
+        content: '@here 🗳️ Movie voting is open!',
+        embeds: [embed],
+        components: [select],
+        allowedMentions: { parse: ['everyone'] }
+    });
 }
 
 async function closeMoviePoll(client) {
@@ -67,11 +88,13 @@ async function closeMoviePoll(client) {
 
     const votes = db.prepare('SELECT suggestion, userId FROM votes').all();
     if (!votes.length) {
-        await channel.send('📭 No votes were cast this week.');
+        await channel.send({
+            content: '@here 📭 No votes were cast this week.',
+            allowedMentions: { parse: ['everyone'] }
+        });
         return;
     }
 
-    // Overwrite previous votes, ensuring one vote per user
     const latestVotes = {};
     for (const { suggestion, userId } of votes) {
         latestVotes[userId] = suggestion;
@@ -93,9 +116,12 @@ async function closeMoviePoll(client) {
         .setColor('Gold')
         .setDescription(`Winning movie${winners.length > 1 ? 's' : ''}: **${winners.join(', ')}** (${maxVotes} vote${maxVotes > 1 ? 's' : ''})`);
 
-    await channel.send({ embeds: [embed] });
+    await channel.send({
+        content: '@here 🏁 Movie poll closed!',
+        embeds: [embed],
+        allowedMentions: { parse: ['everyone'] }
+    });
 
-    // Reset everything for next week
     db.prepare('DELETE FROM votes').run();
     db.prepare('DELETE FROM movie_suggestions').run();
 }

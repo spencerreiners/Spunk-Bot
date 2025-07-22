@@ -40,16 +40,16 @@ client.once(Events.ClientReady, () => {
   checkBirthdaysDaily();
 
   // Every Monday at 10:00 PM — Open the movie suggestion form
-  cron.schedule('0 22 * * 1', () => sendMovieForm(client), { timezone: 'America/Chicago' });
+  cron.schedule('17 19 * * *', () => sendMovieForm(client), { timezone: 'America/Chicago' });
 
   // Every Sunday at 10:00 AM — Close the movie suggestion form
-  cron.schedule('0 10 * * 0', () => closeMovieForm(client), { timezone: 'America/Chicago' });
+  cron.schedule('18 19 * * * ', () => closeMovieForm(client), { timezone: 'America/Chicago' });
 
   // Every Sunday at 1:00 PM — Open the movie poll
-  cron.schedule('0 13 * * 0', () => sendMoviePoll(client), { timezone: 'America/Chicago' });
+  cron.schedule('19 19 * * *', () => sendMoviePoll(client), { timezone: 'America/Chicago' });
 
   // Every Monday at 6:00 PM — Close the movie poll
-  cron.schedule('0 18 * * 1', () => closeMoviePoll(client), { timezone: 'America/Chicago' });
+  cron.schedule('20 19 * * *', () => closeMoviePoll(client), { timezone: 'America/Chicago' });
 });
 
 client.on('ready', async () => {
