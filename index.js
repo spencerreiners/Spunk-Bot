@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, Events, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const cron = require("node-cron");
 const { token } = require("./config.json");
 const { db, initDb } = require("./setup-database");
 
@@ -12,8 +13,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-
-require('./commands/movie-monday/scheduler')(client);
 
 initDb();
 
@@ -34,10 +33,18 @@ for (const folder of commandFolders) {
   }
 }
 
+const { sendMovieForm, closeMovieForm, sendMoviePoll, closeMoviePoll } = require("./commands/movie-monday/scheduler");
+
 client.once(Events.ClientReady, () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
   checkBirthdaysDaily();
+
+  cron.schedule('02 19 * * *', () => sendMovieForm(client), { timezone: 'America/Chicago' }); // 6:29 PM
+  cron.schedule('03 19 * * *', () => closeMovieForm(client), { timezone: 'America/Chicago' }); // 6:30 PM
+  cron.schedule('04 19 * * *', () => sendMoviePoll(client), { timezone: 'America/Chicago' }); // 6:31 PM
+  cron.schedule('05 19 * * *', () => closeMoviePoll(client), { timezone: 'America/Chicago' }); // 6:32 PM
 });
+
 
 client.on('ready', async () => {
   const channel = client.channels.cache.get('1065349629232828569');

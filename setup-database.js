@@ -33,6 +33,15 @@ const initDb = () => {
         userId TEXT,
         suggestion TEXT
     )`).run();
+
+    // Drop and recreate votes table with PRIMARY KEY on userId
+    db.prepare(`DROP TABLE IF EXISTS votes`).run();
+    db.prepare(`
+        CREATE TABLE votes (
+            userId TEXT PRIMARY KEY,
+            suggestion TEXT NOT NULL
+        )
+    `).run();
 };
 
 initDb();

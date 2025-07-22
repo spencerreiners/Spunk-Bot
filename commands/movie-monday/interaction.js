@@ -25,7 +25,16 @@ module.exports = {
     },
 
     async handleSelect(interaction) {
-        const choice = interaction.values[0].split('_')[0];
-        interaction.reply({ content: `You voted for **${choice}**. Thanks!`, ephemeral: true });
+        const selected = interaction.values[0]; // e.g., "MovieTitle_userId"
+        const [suggestion] = selected.split('_');
+
+        // Upsert vote (overwrite previous vote if user already voted)
+        db.prepare(`
+            INSERT INTO votes (userId, suggestion)
+            VALUES (?, ?)
+            ON CONFLICT(userId) DO UPDATE SET suggestion = excluded.suggestion
+        `).run(interaction.user.id, selected);
+
+        interaction.reply({ content: `You voted for **${suggestion}**. Thanks!`, ephemeral: true });
     }
 };
