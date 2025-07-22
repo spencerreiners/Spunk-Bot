@@ -7,18 +7,27 @@ const {
     StringSelectMenuBuilder
 } = require('discord.js');
 
+function getNextMondayDate() {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysUntilMonday = (8 - dayOfWeek) % 7;
+    now.setDate(now.getDate() + daysUntilMonday);
+    return now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
 async function sendMovieForm(client) {
     const channel = await client.channels.fetch('1361176597616660480');
     if (!channel) return;
     db.prepare('DELETE FROM movie_suggestions').run();
 
-    const embed = new EmbedBuilder().setTitle('🎬 Suggest a Movie!').setColor('Blue');
+    const mondayDate = getNextMondayDate();
+    const embed = new EmbedBuilder().setTitle(`🎬 Suggest a Movie for ${mondayDate}!`).setColor('Blue');
     const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('submit_movie').setLabel('Submit').setStyle(ButtonStyle.Primary)
     );
 
     await channel.send({
-        content: '@here 🎬 Suggest a Movie!',
+        content: `@here 🎬 Suggest a Movie for ${mondayDate}!`,
         embeds: [embed],
         components: [row],
         allowedMentions: { parse: ['everyone'] }
@@ -63,8 +72,9 @@ async function sendMoviePoll(client) {
         value: `${r.suggestion}_${r.userId}`.slice(0, 100)
     }));
 
+    const mondayDate = getNextMondayDate();
     const embed = new EmbedBuilder()
-        .setTitle('🎥 Vote for This Week’s Movie!')
+        .setTitle(`🎥 Vote for This Week’s Movie (${mondayDate})!`)
         .setColor('Green');
 
     const select = new ActionRowBuilder().addComponents(
@@ -75,7 +85,7 @@ async function sendMoviePoll(client) {
     );
 
     await channel.send({
-        content: '@here 🗳️ Movie voting is open!',
+        content: `@here 🗳️ Movie voting is open for ${mondayDate}!`,
         embeds: [embed],
         components: [select],
         allowedMentions: { parse: ['everyone'] }
@@ -111,10 +121,11 @@ async function closeMoviePoll(client) {
         .filter(([_, count]) => count === maxVotes)
         .map(([name]) => name);
 
+    const mondayDate = getNextMondayDate();
     const embed = new EmbedBuilder()
         .setTitle('🏆 Poll Closed!')
         .setColor('Gold')
-        .setDescription(`Winning movie${winners.length > 1 ? 's' : ''}: **${winners.join(', ')}** (${maxVotes} vote${maxVotes > 1 ? 's' : ''})`);
+        .setDescription(`Winning movie${winners.length > 1 ? 's' : ''} for ${mondayDate}: **${winners.join(', ')}** (${maxVotes} vote${maxVotes > 1 ? 's' : ''})`);
 
     await channel.send({
         content: '@here 🏁 Movie poll closed!',
