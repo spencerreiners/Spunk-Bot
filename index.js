@@ -39,12 +39,18 @@ client.once(Events.ClientReady, () => {
   console.log(`Ready! Logged in as ${client.user.tag}`);
   checkBirthdaysDaily();
 
-  cron.schedule('02 19 * * *', () => sendMovieForm(client), { timezone: 'America/Chicago' }); // 6:29 PM
-  cron.schedule('03 19 * * *', () => closeMovieForm(client), { timezone: 'America/Chicago' }); // 6:30 PM
-  cron.schedule('04 19 * * *', () => sendMoviePoll(client), { timezone: 'America/Chicago' }); // 6:31 PM
-  cron.schedule('05 19 * * *', () => closeMoviePoll(client), { timezone: 'America/Chicago' }); // 6:32 PM
-});
+  // Every Monday at 10:00 PM — Open the movie suggestion form
+  cron.schedule('0 22 * * 1', () => sendMovieForm(client), { timezone: 'America/Chicago' });
 
+  // Every Sunday at 10:00 AM — Close the movie suggestion form
+  cron.schedule('0 10 * * 0', () => closeMovieForm(client), { timezone: 'America/Chicago' });
+
+  // Every Sunday at 1:00 PM — Open the movie poll
+  cron.schedule('0 13 * * 0', () => sendMoviePoll(client), { timezone: 'America/Chicago' });
+
+  // Every Monday at 6:00 PM — Close the movie poll
+  cron.schedule('0 18 * * 1', () => closeMoviePoll(client), { timezone: 'America/Chicago' });
+});
 
 client.on('ready', async () => {
   const channel = client.channels.cache.get('1065349629232828569');
