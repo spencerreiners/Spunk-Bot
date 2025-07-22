@@ -144,7 +144,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else if (interaction.isButton()) {
     const roleMap = {
       "verified": "355442027757961218",
-      "film_critic": "1065351909025779835",
+      "film_critic": "1397012226862485554",
       "true_gamer": "1065347777158189147",
       "bell_dinger": "1065357188975046738",
     };
